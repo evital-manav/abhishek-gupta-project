@@ -1,0 +1,29 @@
+<mat-toolbar color="primary" class="navbar">
+  <div class="container">
+    <span class="navbar-brand">Patient Management</span>
+    <span class="spacer"></span>
+    <div class="navbar-links">
+      <button mat-button routerLink="/view-patient" routerLinkActive="active">
+        View Patient
+      </button>
+      <button mat-button routerLink="/add-patient" routerLinkActive="active">
+        Add Patient
+      </button>
+    </div>
+    <button mat-button [matMenuTriggerFor]="menu" class="menu-button">
+      Menu
+    </button>
+    <mat-menu #menu="matMenu">
+      <button
+        mat-menu-item
+        routerLink="/view-patient"
+        routerLinkActive="active"
+      >
+        View Patient
+      </button>
+      <button mat-menu-item routerLink="/add-patient" routerLinkActive="active">
+        Add Patient
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>

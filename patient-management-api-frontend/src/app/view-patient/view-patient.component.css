@@ -1,0 +1,77 @@
+.loading-message,
+.no-patients {
+  font-size: 18px;
+  text-align: center;
+
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.card-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #f3f4f6 0%, #d1d5db 100%);
+}
+
+h2.patient-title {
+  margin: 1.5rem 0;
+  font-size: 24px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.patient-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+}
+
+.patient-card {
+  background-color: rgba(211, 211, 211, 0.373);
+  width: 100%;
+  max-width: 50rem;
+  background: linear-gradient(135deg, #ffffff 0%, #ded0df 100%);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.patient-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+  cursor: pointer;
+}
+
+.patient-details {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 4px 0;
+}
+
+.alert {
+  background-color: #f443365e;
+  color: red;
+  padding: 16px;
+  position: fixed;
+  top: 5rem;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  z-index: 1000;
+  border-radius: 4px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
