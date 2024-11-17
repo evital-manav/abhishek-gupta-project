@@ -10,10 +10,10 @@ import jwt from "jsonwebtoken";
 
 export function addressSchema(req: any, res: any, next: any): any {
   const schema = Joi.object({
-    state: Joi.string().min(2).required(),
-    street: Joi.string().min(3).required(),
-    city: Joi.string().min(2).required(),
-    pincode: Joi.number().required(),
+    state: Joi.string().min(2).max(50).required(),
+    street: Joi.string().min(3).max(100).required(),
+    city: Joi.string().min(2).max(50).required(),
+    pincode: Joi.number().integer().min(100000).max(999999).required(),
   });
   const validationsObj = new validations();
   const isValid = validationsObj.validateRequest(req, res, next, schema);
@@ -29,8 +29,14 @@ export function signupSchema(req: any, res: any, next: any): any {
   const schema = Joi.object({
     name: Joi.string().min(3).required(),
     email: Joi.string().email().lowercase().required(),
-    password: Joi.string().min(3).required(), // Updated password rule to min(3)
-    phone: Joi.string().required(),
+    password: Joi.string()
+      .min(3)
+      .pattern(/^[a-zA-Z0-9!@#$%^&*(),.?":{}|<>]*$/)
+      .required(),
+    phone: Joi.string()
+      .length(10)
+      .pattern(/^[0-9]+$/)
+      .required(),
     usertype: Joi.string()
       .valid("restaurant_owner", "delivery_person", "customer")
       .required(), // Added specific valid user types
@@ -86,13 +92,15 @@ async function signup(req: any, res: any): Promise<any> {
     const existingUser = await usersObj.getUserByEmail(user_email);
     if (existingUser) {
       res.send(functionsObj.output(0, "User with this email aldready exists"));
-     
+
       return false;
     }
-    const result: any = await usersObj.insertUser({
+    const result: any = await usersObj.insertRecord({
       ...req.body,
       password: hashedPassword,
     });
+    if(!result) res.send(functionsObj.output(0, "FAILED_TO_REGISTER_USER"));
+
 
     res.send(functionsObj.output(1, "User successfully registered", result));
     return false;
@@ -142,7 +150,7 @@ async function login(req: any, res: any): Promise<any> {
       results: user,
       token: token,
     };
-   
+
     res.send(functionsObj.output(1, "User logged in successfully", data));
     return false;
   } catch (error) {
@@ -155,20 +163,19 @@ async function login(req: any, res: any): Promise<any> {
 async function addAddress(req: any, res: Response): Promise<any> {
   const functionsObj = new functions();
 
-
   try {
     // Create an instance of dbAddress
     const addressObj = new dbAddress();
     let addressData = {
       ...req.body,
       user_id: req.user.id,
-    }
+    };
     const newAddress = await addressObj.insertRecord(addressData);
-  
-
-    res.send(
-      functionsObj.output(1, "Address created successfully", newAddress)
-    );
+     if(!newAddress)
+    res.send(functionsObj.output(0,'FAILED TO ADD ADDRESS'))
+      res.send(functionsObj.output(1, "Address created successfully", newAddress)
+      );
+    return;
   } catch (error: any) {
     res.send(functionsObj.output(0, "Failed to create address"));
   }

@@ -36,11 +36,11 @@ async function createRestaurant(req: any, res: any): Promise<any> {
   try {
     let restaurantObj = new dbRestaurant();
     if (req.user.userType === "restaurant_owner") {
-      const newRestaurant = await restaurantObj.insertRestaurant({
+      const newRestaurant = await restaurantObj.insertRecord({
         ...req.body,
         owner_id: req.user.id,
       });
-
+if(!newRestaurant) res.send(functionsObj.output(0,"FAILED_TO_ADD_RESTAURANT"))
       res.send(
         functionsObj.output(1, "Restaurant created successfully", newRestaurant)
       );
@@ -82,7 +82,7 @@ async function getRestaurantMenu(req: any, res: any) {
   const functionsObj = new functions();
 
   try {
-    console.log("restaurant_id", id);
+   
 
     const restaurantmenuObj = new dbRestaurantMenu();
 
@@ -111,7 +111,7 @@ async function searchRestaurantByName(req: any, res: any): Promise<any> {
   const { name } = req.query;
   const functionsObj = new functions();
 
-  console.log("restaurant_name", name);
+
 
   if (!name) {
     res.send(functionsObj.output(0, "Restaurant name is required"));

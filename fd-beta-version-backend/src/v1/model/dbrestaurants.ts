@@ -7,19 +7,6 @@ export class dbRestaurant extends appdb {
     this.uniqueField = "id";
   }
 
-  /**
-   * Insert new restaurant record in the database.
-   * @param restaurantData - Object containing the restaurant data
-   * @returns newly inserted restaurant object
-   */
-  async insertRestaurant(restaurantData: {
-    name: string;
-    address: string;
-    phone: string;
-    owner_id: number;
-  }) {
-    return this.insertRecord(restaurantData);
-  }
 
   /**
    * Fetch all restaurants from the database.

@@ -26,15 +26,15 @@ export class dbCartItems extends appdb {
     this.where = `WHERE ci.cart_id = ${cartId}`;
     this.orderby = "";
 
-    const rows = await this.allRecords(fields);
-
+    let results= await this.allRecords(fields);
+     results =  results? results.rows: []
     // Calculate the total amount
-    const totalAmount = rows
+    let totalAmount = results.rows
       .reduce((sum: number, item: any) => sum + parseFloat(item.total_price), 0)
       .toFixed(2);
 
     // Return the items and total amount
-    return { items: rows, totalamount: totalAmount };
+    return { items: results.rows, totalamount: totalAmount };
   }
 
   async addItemToCart(
@@ -43,30 +43,44 @@ export class dbCartItems extends appdb {
     quantity: number,
     price: number
   ) {
-    const existingItemResult = await this.select(
-      "cartitems",
-      "*",
-      `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`,
-      "",
-      ""
-    );
+    let return_results = {
+      error: true,
+      message: "something_went_wrong",
+      results: {},
+    };
+    this.where = `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`;
+     
+    const existingItemResult = await this.allRecords();
 
-    if (existingItemResult.length > 0) {
+    // const existingItemResult = await this.select(
+    //   "cartitems",
+    //   "*",
+    //   `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`,"",""
+    // );
+
+    if (existingItemResult && existingItemResult.length > 0) {
       const existingItem = existingItemResult[0];
       const newQuantity =
         (existingItem.quantity as number) +
         (typeof quantity === "string" ? parseInt(quantity) : quantity);
 
-      await this.update(
+      let updatedQuantity = await this.update(
         "cartitems",
         { quantity: newQuantity },
         `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`
       );
+      if (!updatedQuantity) return return_results;
       let data = {
         ...existingItem,
         quantity: newQuantity,
       };
-      return data;
+
+      return {
+        ...return_results,
+        error: false,
+        message: "quantity_updated_successfully",
+        results: data,
+      };
     } else {
       const result = await this.insertRecord({
         cart_id: cartId,
@@ -74,7 +88,13 @@ export class dbCartItems extends appdb {
         quantity: quantity,
         price: price,
       });
-      return result;
+      if (!result)
+        return { ...return_results, message: "item_could_not_added" };
+      return {
+        ...return_results,
+        error: false,
+        message: "Item_added_successfully",
+      };
     }
   }
   async removeItemFromCart(
@@ -110,15 +130,5 @@ export class dbCartItems extends appdb {
       `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`
     );
     return { ...existingItem, quantity: newQuantity };
-  }
-
-  /**
-   * Clear all items in the cart.
-   * @param cartId - Cart's unique ID
-   * @returns Message indicating the result of the operation
-   */
-  async clearCart(cartId: number | string) {
-    await this.delete("cartitems", `WHERE cart_id = ${cartId}`);
-    return { message: "All items removed from the cart" };
   }
 }

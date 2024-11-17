@@ -30,7 +30,7 @@ export class dbRestaurantMenu extends appdb {
       this.table = table; 
       const result = await this.allRecords(fields);
 
-      return result.length ? result : null;
+      return result.length ? result : [];
     } catch (error) {
       console.error("Error fetching menu with food items:", error);
       throw error; 

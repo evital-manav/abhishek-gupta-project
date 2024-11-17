@@ -7,7 +7,6 @@ import { validations } from "../library/validations";
 import { dbOrderItems } from "../model/dborderitems";
 import { dbCartItems } from "../model/dbcartitems";
 
-
 const functionsObj = new functions();
 
 const router = express.Router();
@@ -20,7 +19,6 @@ module.exports = router;
 async function createOrder(req: any, res: Response) {
   const { restaurant_id, cart_id } = req.query;
 
-
   try {
     console.log("restaurantId and cartId", restaurant_id, cart_id);
 
@@ -28,30 +26,35 @@ async function createOrder(req: any, res: Response) {
     let cartObj = new dbcart();
     let cartitemsObj = new dbCartItems();
     const cartItems = await cartitemsObj.getCartItemsWithTotal(cart_id);
-    console.log("cartItems.items", cartItems.items);
+
     let ordersObj = new dborders();
     // Create order
-    const order = await ordersObj.createOrder(
-      req.user.id,
-      restaurant_id,
-      cartItems.totalamount
-    );
- 
+    const orderData = {
+      customer_id: req.user.id,
+      restaurant_id: restaurant_id,
+      totalamount: cartItems.totalamount,
+      orderstatus: "pending",
+    };
+    const order = await ordersObj.insertRecord(orderData);
+    if (!order) res.send(functionsObj.output(0, "FALIED_TO_CREATE_ORDER"));
+    res.send(functionsObj.output(1, "ORDER_CREATED_SUCCESSFULLY"));
 
     let orderitemsObj = new dbOrderItems();
 
     // Add order items
     for (const item of cartItems.items) {
-      await orderitemsObj.addOrderItem(
-        order,
-        item.food_item_id,
-        item.quantity,
-        item.price
-      );
+      let result = await orderitemsObj.insertRecord({
+        order_id: order,
+        food_item_id: item.food_item_id,
+        quantity: item.quantity,
+        price: item.price,
+      });
+      if (!result) res.send(functionsObj.output(0, "SOMETHING WENT WRONG"));
     }
 
     // Clear cart after placing the order
-    await cartitemsObj.clearCart(cart_id);
+    cartitemsObj.uniqueField = cart_id;
+    await cartitemsObj.deleteRecord(cart_id);
 
     res.send(
       functionsObj.output(1, "Order placed successfully", {
@@ -65,7 +68,6 @@ async function createOrder(req: any, res: Response) {
 
 async function fetchOrders(req: any, res: Response) {
   try {
-
     let ordersObj = new dborders();
     // Get order details for the user
     let user_id = req.user.id;
@@ -79,7 +81,6 @@ async function fetchOrders(req: any, res: Response) {
       res.send(functionsObj.output(0, "Orders not found"));
     }
   } catch (error: any) {
-   
     res.send(functionsObj.output(0, "Internal server error"));
   }
 }

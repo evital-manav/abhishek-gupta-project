@@ -7,14 +7,7 @@ export class dbusers extends appdb {
     this.uniqueField = "id";
   }
 
-  /**
-   * Insert a new user into the database
-   * @param userData - An object containing user information
-   * @returns - Inserted user record
-   */
-  async insertUser(userData: any) {
-    return this.insertRecord(userData);
-  }
+
 
   /**
    * Get a user by email
@@ -25,6 +18,6 @@ export class dbusers extends appdb {
     this.where = `WHERE email = '${email}'`;
     const result = await this.allRecords();
 
-    return result.length > 0 ? result[0] : null;
+    return result.length > 0 ? result[0] : [];
   }
 }

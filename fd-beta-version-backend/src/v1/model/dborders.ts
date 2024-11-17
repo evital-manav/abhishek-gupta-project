@@ -8,48 +8,11 @@ export class dborders extends appdb {
   }
 
   /**
-   * Create a new order in the database using the `insertRecord` method.
-   * @param userId - ID of the user who placed the order
-   * @param restaurantId - ID of the restaurant
-   * @param totalPrice - Total price of the order
-   * @returns Newly created order object
-   */
-  async createOrder(userId: number, restaurantId: number, totalPrice: number) {
-    const orderData = {
-      customer_id: userId,
-      restaurant_id: restaurantId,
-      totalamount: totalPrice,
-      orderstatus: "pending",
-    };
-    const result = await this.insertRecord(orderData);
-
-    return result;
-  }
-
-  /**
    * Fetch order details including restaurant name, food items, and total price for a user.
    * @param userId - ID of the user
    * @returns Order details object
    */
-  // async getOrderDetails(userId: number) {
-  //   const table = `
-  //     restaurants rs
-  //     JOIN ${this.table} od ON od.restaurant_id = rs.id
-  //     JOIN order_items odi ON odi.order_id = od.id
-  //   `;
-  //   const fields = `
-  //     rs.name AS restaurantName,
-  //     (odi.price * odi.quantity) AS total_price,
-  //     odi.food_item_id,
-  //     odi.quantity,
-  //     odi.price
-  //   `;
-  //   const where = `WHERE od.customer_id = ${userId}`;
 
-  //   // Use the select method from the parent db class
-  //   const result = await this.select(table, fields, where, "", "");
-  //   return result;
-  // }
   async getOrderDetails(userId: number) {
     const fields = `
       rs.name AS restaurantName, 
