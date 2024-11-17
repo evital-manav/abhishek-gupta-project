@@ -12,7 +12,7 @@ export function createRatingSchema(
   next: any
 ): any {
   const schema = Joi.object({
-    restaurantId: Joi.number().required(),
+    restaurantId: Joi.number().required().greater(0),
     rating: Joi.number().min(1).max(5).required(),
   });
 
@@ -35,21 +35,15 @@ module.exports = router;
 async function createRating(req: any, res: any): Promise<any> {
   const { restaurantId, rating } = req.body;
 
-  try {
-    let ratingsObj = new dbRatings();
-    let user_id = req.user.id;
-    const newRating = await ratingsObj.insertRating(
-      restaurantId,
-      rating,
-      user_id
-    );
-    return res.send(
-      functionsObj.output(1, "Rating added successfully", newRating)
-    );
-  } catch (error: any) {
-    
-    return res.send(
-      functionsObj.output(0, "Rating couldn't be added due to some issues")
-    );
-  }
+  let ratingsObj = new dbRatings();
+  let user_id = req.user.id;
+  const ratingData = {
+    restaurant_id: restaurantId,
+    rating: rating,
+    user_id: user_id,
+  };
+  const newRating = await ratingsObj.insertRecord(ratingData);
+  if (!newRating) res.send(functionsObj.output, "FAILED_TO_ADD_RATING");
+  res.send(functionsObj.output(1, "Rating added successfully", newRating));
+  return;
 }

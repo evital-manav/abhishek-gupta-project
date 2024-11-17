@@ -11,8 +11,8 @@ const validationsObj = new validations();
 const functionsObj = new functions();
 export function paymentSchema(req: Request, res: Response, next: any): any {
   const schema = Joi.object({
-    orderId: Joi.number().required(),
-    paymentMethod: Joi.string().required(),
+    orderId: Joi.number().required().greater(0),
+    paymentMethod: Joi.string().trim().replace(/'/g, "").required(),
   });
 
   const validationsObj = new validations();
@@ -40,8 +40,8 @@ async function createPayment(req: any, res: Response): Promise<any> {
     // Fetch the total amount for the order
     const orderObj = new dborders();
     let user_id = req.user.id;
-    const totalAmount = await orderObj.getTotalForOrderId(user_id, orderId);
-
+    const results = await orderObj.getTotalForOrderId(user_id, orderId);
+    let totalAmount = results[0].totalamount;
     // Insert payment record
     const paymentsObj = new dbPayments();
     const paymentDetails = await paymentsObj.insertRecord({
@@ -49,6 +49,7 @@ async function createPayment(req: any, res: Response): Promise<any> {
       paymentMethod,
       totalAmount,
     });
+    if (!paymentDetails) res.send(functionsObj.output(0, "PAYMENT_FAILED"));
     // Fetch a delivery person ID
     const deliveryObj = new dbDeliveries();
     const usersObj = new dbusers();
@@ -60,11 +61,16 @@ async function createPayment(req: any, res: Response): Promise<any> {
     }
     let deliveryPersonId = result[0].id;
     // Create the delivery record
-    const deliveryDetails = await deliveryObj.createDelivery(
-      orderId,
-      deliveryPersonId
-    );
 
+    const deliveryData = {
+      order_id: orderId,
+      delivery_person_id: deliveryPersonId,
+      delivery_status: "processing",
+    };
+
+    const deliveryDetails = await deliveryObj.insertRecord(deliveryData);
+    if (!deliveryDetails)
+      res.send(functionsObj.output(0, "SOMETHING_WENT_WRONG"));
     // Return success response
     res.send(
       functionsObj.output(

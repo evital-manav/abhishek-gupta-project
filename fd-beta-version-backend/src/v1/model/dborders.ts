@@ -48,20 +48,13 @@ export class dborders extends appdb {
    * @param orderId - ID of the order
    * @returns Total amount of the order
    */
-  async getTotalForOrderId(userId: number, orderId: number): Promise<number> {
+  async getTotalForOrderId(userId: number, orderId: number) {
     const fields = "totalamount";
 
     this.where = `WHERE customer_id = ${userId} AND id = ${orderId}`;
 
-    try {
-      const result = await this.allRecords(fields);
+    const results = await this.allRecords(fields);
 
-      console.log("result[0].totalamount", result[0].totalamount);
-
-      return result.length > 0 ? result[0].totalamount : 0;
-    } catch (error) {
-      console.log("Error fetching total amount:", error);
-      throw error;
-    }
+    return results.length > 0 ? results : [];
   }
 }
