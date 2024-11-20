@@ -1,4 +1,5 @@
 import express from "express";
+import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
 import { dborders } from "../model/dborders";
 import { dbcart } from "../model/dbcart";
@@ -7,15 +8,28 @@ import { validations } from "../library/validations";
 import { dbOrderItems } from "../model/dborderitems";
 import { dbCartItems } from "../model/dbcartitems";
 
-const functionsObj = new functions();
+let functionsObj = new functions();
+let validationsObj = new validations();
 
 const router = express.Router();
-
-router.post("/place_order", createOrder);
-router.get("/fetch_orders", fetchOrders);
-
+router.post("/place_order", createOrderSchema, createOrder);
+router.post("/list", fetchOrders);
 module.exports = router;
 
+function createOrderSchema(req: Request, res: Response, next: NextFunction) {
+  const schema = Joi.object({
+    restaurant_id: Joi.number().greater(0).required(),
+    cart_id: Joi.number().min(1).required(),
+  });
+
+  const isValid = validationsObj.validateRequest(req, res, next, schema);
+
+  if (!isValid) {
+    return false;
+  }
+
+  next();
+}
 async function createOrder(req: any, res: Response) {
   const { restaurant_id, cart_id } = req.query;
 

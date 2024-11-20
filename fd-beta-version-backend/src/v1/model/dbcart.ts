@@ -16,7 +16,7 @@ export class dbcart extends appdb {
   async getCartByUserId(userId: number) {
     this.where = `WHERE user_id = ${userId}`;
     const result = await this.listRecords();
-    return result.length ? result[0] : null;
+    return result.length ? result[0] : [];
   }
   /**
    * Create a new cart for the user.

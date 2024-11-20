@@ -4,19 +4,19 @@ import { validations } from "../library/validations";
 import Joi from "joi";
 import { functions } from "../library/functions";
 
-const functionsObj = new functions();
+let functionsObj = new functions();
+let validationsObj = new validations();
 
-export function createRatingSchema(
-  req: Request,
-  res: Response,
-  next: any
-): any {
+const router = express.Router();
+router.post("/add", createRatingSchema, createRating);
+module.exports = router;
+
+function createRatingSchema(req: Request, res: Response, next: any): any {
   const schema = Joi.object({
     restaurantId: Joi.number().required().greater(0),
     rating: Joi.number().min(1).max(5).required(),
   });
 
-  const validationsObj = new validations();
   const isValid = validationsObj.validateRequest(req, res, next, schema);
 
   if (!isValid) {
@@ -25,12 +25,6 @@ export function createRatingSchema(
 
   next();
 }
-
-const router = express.Router();
-
-router.post("/add_rating", createRating);
-
-module.exports = router;
 
 async function createRating(req: any, res: any): Promise<any> {
   const { restaurantId, rating } = req.body;

@@ -18,7 +18,6 @@ export class dbRestaurantMenu extends appdb {
     `;
 
     this.where = `WHERE rm.restaurant_id =  ${restaurantId}`;
-    this.orderby = "";
 
     const table = `
       restaurantMenu rm

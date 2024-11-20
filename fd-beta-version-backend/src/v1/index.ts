@@ -10,7 +10,6 @@ const router = express.Router();
 
 router.use(checkAccess);
 
-
 async function checkAccess(req: any, res: any, next: any): Promise<any> {
   // Logic to check access
   let functionsObj = new functions();
@@ -53,11 +52,10 @@ let ratingsRouter = require("./controller/ratings");
  * Primary app routes.
  */
 router.use("/users", usersRouter);
-router.use("/restaurants/online_orders", restaurantsRouter);
-router.use("/food_items/online_orders", cartRouter);
-router.use("/orders/online_orders", ordersRouter);
-
-router.use("/payments/online_orders", paymentsRouter);
-router.use("/ratings/online_orders", ratingsRouter);
+router.use("/restaurants", restaurantsRouter);
+router.use("/cart", cartRouter);
+router.use("/orders", ordersRouter);
+router.use("/payments", paymentsRouter);
+router.use("/ratings", ratingsRouter);
 
 module.exports = router;

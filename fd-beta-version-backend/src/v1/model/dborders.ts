@@ -35,7 +35,7 @@ export class dborders extends appdb {
 
     try {
       const result = await this.allRecords(fields);
-      return result.length ? result : null;
+      return result.length ? result : [];
     } catch (error) {
       console.error("Error fetching order details:", error);
       throw error;

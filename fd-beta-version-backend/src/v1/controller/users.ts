@@ -8,24 +8,16 @@ import { dbAddress } from "../model/dbaddress";
 import { dbusers } from "../model/dbusers";
 import jwt from "jsonwebtoken";
 
-export function addressSchema(req: any, res: any, next: any): any {
-  const schema = Joi.object({
-    state: Joi.string().min(2).max(50).required(),
-    street: Joi.string().min(3).max(100).required(),
-    city: Joi.string().min(2).max(50).required(),
-    pincode: Joi.number().integer().min(100000).max(999999).required(),
-  });
-  const validationsObj = new validations();
-  const isValid = validationsObj.validateRequest(req, res, next, schema);
+let validationsObj = new validations();
+let filefunctionsObj = new filefunctions();
 
-  if (!isValid) {
-    return false;
-  }
+const router = express.Router();
+router.post("/signup", signupSchema, signup);
+router.post("/login", loginSchema, login);
+router.post("/address/add", addressSchema, addAddress);
+module.exports = router;
 
-  next();
-}
-
-export function signupSchema(req: any, res: any, next: any): any {
+function signupSchema(req: any, res: any, next: any): any {
   const schema = Joi.object({
     name: Joi.string().min(3).required(),
     email: Joi.string().email().lowercase().required(),
@@ -39,12 +31,10 @@ export function signupSchema(req: any, res: any, next: any): any {
       .required(),
     usertype: Joi.string()
       .valid("restaurant_owner", "delivery_person", "customer")
-      .required(), // Added specific valid user types
+      .required(),
   });
 
-  const validationsObj = new validations();
-
-  const isValid = validationsObj.validateRequest(req, res, next, schema);
+  let isValid = validationsObj.validateRequest(req, res, next, schema);
 
   if (!isValid) {
     return false;
@@ -52,36 +42,11 @@ export function signupSchema(req: any, res: any, next: any): any {
 
   next();
 }
-export function loginSchema(req: any, res: any, next: any): any {
-  const schema = Joi.object({
-    email: Joi.string().email().lowercase().required(),
-    password: Joi.string().min(2).required(),
-  });
-
-  const validationsObj = new validations();
-
-  const isValid = validationsObj.validateRequest(req, res, next, schema);
-
-  if (!isValid) {
-    return false;
-  }
-
-  next();
-}
-
-const router = express.Router();
-router.post("/signup", signupSchema, signup);
-router.post("/login", loginSchema, login);
-router.post("/add_address", addressSchema, addAddress);
-
-module.exports = router;
 
 async function signup(req: any, res: any): Promise<any> {
   var functionsObj = new functions();
   try {
     const { name, email, phone, password, usertype } = req.body;
-
-    var filefunctionsObj = new filefunctions();
 
     let user_password = password;
 
@@ -99,8 +64,7 @@ async function signup(req: any, res: any): Promise<any> {
       ...req.body,
       password: hashedPassword,
     });
-    if(!result) res.send(functionsObj.output(0, "FAILED_TO_REGISTER_USER"));
-
+    if (!result) res.send(functionsObj.output(0, "FAILED_TO_REGISTER_USER"));
 
     res.send(functionsObj.output(1, "User successfully registered", result));
     return false;
@@ -108,6 +72,23 @@ async function signup(req: any, res: any): Promise<any> {
     res.send(functionsObj.output(0, err));
     return false;
   }
+}
+
+export function loginSchema(req: any, res: any, next: any): any {
+  const schema = Joi.object({
+    email: Joi.string().email().lowercase().required(),
+    password: Joi.string().min(2).required(),
+  });
+
+  const validationsObj = new validations();
+
+  const isValid = validationsObj.validateRequest(req, res, next, schema);
+
+  if (!isValid) {
+    return false;
+  }
+
+  next();
 }
 
 async function login(req: any, res: any): Promise<any> {
@@ -160,6 +141,23 @@ async function login(req: any, res: any): Promise<any> {
   }
 }
 
+export function addressSchema(req: any, res: any, next: any): any {
+  const schema = Joi.object({
+    state: Joi.string().min(2).max(50).required(),
+    street: Joi.string().min(3).max(100).required(),
+    city: Joi.string().min(2).max(50).required(),
+    pincode: Joi.number().integer().min(100000).max(999999).required(),
+  });
+  const validationsObj = new validations();
+  const isValid = validationsObj.validateRequest(req, res, next, schema);
+
+  if (!isValid) {
+    return false;
+  }
+
+  next();
+}
+
 async function addAddress(req: any, res: Response): Promise<any> {
   const functionsObj = new functions();
 
@@ -171,10 +169,10 @@ async function addAddress(req: any, res: Response): Promise<any> {
       user_id: req.user.id,
     };
     const newAddress = await addressObj.insertRecord(addressData);
-     if(!newAddress)
-    res.send(functionsObj.output(0,'FAILED TO ADD ADDRESS'))
-      res.send(functionsObj.output(1, "Address created successfully", newAddress)
-      );
+    if (!newAddress) res.send(functionsObj.output(0, "FAILED TO ADD ADDRESS"));
+    res.send(
+      functionsObj.output(1, "Address created successfully", newAddress)
+    );
     return;
   } catch (error: any) {
     res.send(functionsObj.output(0, "Failed to create address"));

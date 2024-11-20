@@ -7,15 +7,18 @@ import { validations } from "../library/validations";
 import { functions } from "../library/functions";
 import Joi from "joi";
 
-const validationsObj = new validations();
-const functionsObj = new functions();
-export function paymentSchema(req: Request, res: Response, next: any): any {
+let validationsObj = new validations();
+let functionsObj = new functions();
+
+const router = express.Router();
+router.post("/make_payment", createPaymentSchema, createPayment);
+module.exports = router;
+
+function createPaymentSchema(req: Request, res: Response, next: any): any {
   const schema = Joi.object({
     orderId: Joi.number().required().greater(0),
     paymentMethod: Joi.string().trim().replace(/'/g, "").required(),
   });
-
-  const validationsObj = new validations();
 
   const isValid = validationsObj.validateRequest(req, res, next, schema);
 
@@ -25,12 +28,6 @@ export function paymentSchema(req: Request, res: Response, next: any): any {
 
   next();
 }
-
-const router = express.Router();
-
-router.post("/make_payment", createPayment);
-
-module.exports = router;
 
 async function createPayment(req: any, res: Response): Promise<any> {
   try {
@@ -87,9 +84,3 @@ async function createPayment(req: any, res: Response): Promise<any> {
     res.send(functionsObj.output(0, "Failed to process payment."));
   }
 }
-
-const paymentController = {
-  createPayment,
-};
-
-export default paymentController;

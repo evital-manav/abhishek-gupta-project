@@ -52,16 +52,10 @@ export class dbCartItems extends appdb {
      
     const existingItemResult = await this.allRecords();
 
-    // const existingItemResult = await this.select(
-    //   "cartitems",
-    //   "*",
-    //   `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`,"",""
-    // );
-
     if (existingItemResult && existingItemResult.length > 0) {
       const existingItem = existingItemResult[0];
       const newQuantity =
-        (existingItem.quantity as number) +
+        (Number(existingItem.quantity)) +
         (typeof quantity === "string" ? parseInt(quantity) : quantity);
 
       let updatedQuantity = await this.update(

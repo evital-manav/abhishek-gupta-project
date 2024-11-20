@@ -1,11 +1,19 @@
-import express, { NextFunction } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import Joi from "joi";
 import { filefunctions } from "../library/filefunctions";
 import { functions } from "../library/functions";
 import { validations } from "../library/validations";
 import { dbRestaurantMenu } from "../model/dbrestaurantmenu";
 import { dbRestaurant } from "../model/dbrestaurants";
+
+let validationsObj = new validations();
+let functionsObj = new functions();
+
 const router = express.Router();
+router.post("/list", getAllRestaurants);
+router.post("/menu/list", restaurantMenuSchema, getRestaurantMenu);
+router.post("/add_restaurant/", createRestaurantSchema, createRestaurant);
+module.exports = router;
 
 function createRestaurantSchema(req: any, res: any, next: NextFunction): any {
   const schema = Joi.object({
@@ -14,8 +22,7 @@ function createRestaurantSchema(req: any, res: any, next: NextFunction): any {
     phone: Joi.string().required(),
   });
 
-  const validationsObj = new validations();
-  const isValid = validationsObj.validateRequest(req, res, next, schema);
+  let isValid = validationsObj.validateRequest(req, res, next, schema);
 
   if (!isValid) {
     return false;
@@ -23,12 +30,6 @@ function createRestaurantSchema(req: any, res: any, next: NextFunction): any {
 
   next();
 }
-
-router.get("/list", getAllRestaurants);
-router.get("/:id/menu/list", getRestaurantMenu);
-router.post("/add_restaurant/", createRestaurantSchema, createRestaurant);
-router.get("/search_restaurants_by_name", searchRestaurantByName);
-module.exports = router;
 
 async function createRestaurant(req: any, res: any): Promise<any> {
   const functionsObj = new functions();
@@ -40,7 +41,8 @@ async function createRestaurant(req: any, res: any): Promise<any> {
         ...req.body,
         owner_id: req.user.id,
       });
-if(!newRestaurant) res.send(functionsObj.output(0,"FAILED_TO_ADD_RESTAURANT"))
+      if (!newRestaurant)
+        res.send(functionsObj.output(0, "FAILED_TO_ADD_RESTAURANT"));
       res.send(
         functionsObj.output(1, "Restaurant created successfully", newRestaurant)
       );
@@ -63,9 +65,12 @@ if(!newRestaurant) res.send(functionsObj.output(0,"FAILED_TO_ADD_RESTAURANT"))
 async function getAllRestaurants(req: any, res: any): Promise<any> {
   var functionsObj = new functions();
 
+  const { name } = req.query;
+
   try {
     let restaurantObj = new dbRestaurant();
-    const restaurants = await restaurantObj.getAllRestaurants();
+
+    let restaurants = await restaurantObj.getAllRestaurants(name);
 
     res.send(
       functionsObj.output(1, "Restaurants fetched successfully", restaurants)
@@ -77,16 +82,34 @@ async function getAllRestaurants(req: any, res: any): Promise<any> {
   }
 }
 
+function restaurantMenuSchema(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): any {
+  const schema = Joi.object({
+    restaurant_id: Joi.number().greater(0).required().messages({
+      "number.greater": "restaurant_id must be greater than 0",
+      "any.required": "restaurant_id is required",
+      "number.base": "restaurant_id must be a number",
+    }),
+  });
+
+  const validationsObj = new validations();
+  const isValid = validationsObj.validateRequest(req, res, next, schema);
+
+  if (!isValid) {
+    return false;
+  }
+
+  next();
+}
 async function getRestaurantMenu(req: any, res: any) {
-  const { id } = req.params;
-  const functionsObj = new functions();
+  const { restaurant_id } = req.body;
 
   try {
-   
-
     const restaurantmenuObj = new dbRestaurantMenu();
 
-    let restaurant_id = parseInt(id);
     const menuWithItems = await restaurantmenuObj.getMenuWithFoodItems(
       restaurant_id
     );
@@ -104,33 +127,5 @@ async function getRestaurantMenu(req: any, res: any) {
     return res.send(
       functionsObj.output(0, "Internal server error", error.message)
     );
-  }
-}
-
-async function searchRestaurantByName(req: any, res: any): Promise<any> {
-  const { name } = req.query;
-  const functionsObj = new functions();
-
-
-
-  if (!name) {
-    res.send(functionsObj.output(0, "Restaurant name is required"));
-    return false;
-  }
-
-  try {
-    const restaurantObj = new dbRestaurant();
-    const restaurants = await restaurantObj.searchByName(name);
-
-    if (restaurants.length === 0) {
-      res.send(functionsObj.output(0, "No restaurant found with this name"));
-      return false;
-    }
-
-    res.send(
-      functionsObj.output(1, "Restaurants fetched successfully", restaurants)
-    );
-  } catch (error) {
-    res.send(functionsObj.output(0, "Internal server error", error));
   }
 }
