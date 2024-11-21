@@ -16,7 +16,11 @@ router.post("/place_order", createOrderSchema, createOrder);
 router.post("/list", fetchOrders);
 module.exports = router;
 
-function createOrderSchema(req: Request, res: Response, next: NextFunction) {
+function createOrderSchema(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): any {
   const schema = Joi.object({
     restaurant_id: Joi.number().greater(0).required(),
     cart_id: Joi.number().min(1).required(),
@@ -27,7 +31,6 @@ function createOrderSchema(req: Request, res: Response, next: NextFunction) {
   if (!isValid) {
     return false;
   }
-
   next();
 }
 async function createOrder(req: any, res: Response) {

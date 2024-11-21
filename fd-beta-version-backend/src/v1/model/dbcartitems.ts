@@ -1,5 +1,6 @@
+import { error } from "console";
 import { appdb } from "./appdb"; // Import the base class
-
+import { dbcart } from "./dbcart";
 export class dbCartItems extends appdb {
   constructor() {
     super();
@@ -26,8 +27,8 @@ export class dbCartItems extends appdb {
     this.where = `WHERE ci.cart_id = ${cartId}`;
     this.orderby = "";
 
-    let results= await this.allRecords(fields);
-     results =  results? results.rows: []
+    let results = await this.allRecords(fields);
+    results = results ? results.rows : [];
     // Calculate the total amount
     let totalAmount = results.rows
       .reduce((sum: number, item: any) => sum + parseFloat(item.total_price), 0)
@@ -48,14 +49,15 @@ export class dbCartItems extends appdb {
       message: "something_went_wrong",
       results: {},
     };
+
     this.where = `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`;
-     
+
     const existingItemResult = await this.allRecords();
 
     if (existingItemResult && existingItemResult.length > 0) {
       const existingItem = existingItemResult[0];
       const newQuantity =
-        (Number(existingItem.quantity)) +
+        Number(existingItem.quantity) +
         (typeof quantity === "string" ? parseInt(quantity) : quantity);
 
       let updatedQuantity = await this.update(
@@ -91,17 +93,22 @@ export class dbCartItems extends appdb {
       };
     }
   }
-  async removeItemFromCart(
-    cartId: number | string,
-    foodItemId: number | string
-  ) {
-    const existingItemResult = await this.select(
-      "cartitems",
-      "*",
-      `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`,
-      "",
-      ""
-    );
+  async removeItemFromCart(cartId: number, foodItemId: number, userId: number) {
+    let return_results = {
+      error: true,
+      message: "",
+      results: {},
+    };
+    const cartObj = new dbcart();
+    cartObj.where = `WHERE id = ${cartId}`;
+    let cartOwner = await cartObj.listRecords("user_id");
+
+    if (cartOwner !== userId)
+      return { ...return_results, message: "unauthorized_access" };
+
+    this.where = `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`;
+
+    const existingItemResult = await this.listRecords();
 
     if (existingItemResult.length === 0) {
       return false;
@@ -110,19 +117,34 @@ export class dbCartItems extends appdb {
     const existingItem = existingItemResult[0];
 
     if (existingItem.quantity === 1) {
-      await this.delete(
+      let deletedItem = await this.delete(
         "cartitems",
         `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`
       );
+      if (!deletedItem)
+        return {
+          ...return_results,
+          message: "failed_to_remove_item",
+        };
       return existingItem;
     }
 
     const newQuantity = existingItem.quantity - 1;
-    await this.update(
+    let updatedQuantity = await this.update(
       "cartitems",
       { quantity: newQuantity },
       `WHERE cart_id = ${cartId} AND food_item_id = ${foodItemId}`
     );
-    return { ...existingItem, quantity: newQuantity };
+    if (!updatedQuantity)
+      return { ...return_results, message: "failed_to_remove_item" };
+    return_results = {
+      error: false,
+      message: "item_quantity_updated_successfully",
+      results: {
+        ...existingItem,
+        quantity: newQuantity,
+      },
+    };
+    return return_results;
   }
 }
