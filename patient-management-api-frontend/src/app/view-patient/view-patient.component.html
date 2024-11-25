@@ -1,0 +1,49 @@
+<app-alert [message]="error" *ngIf="error" (close)="onClose()"></app-alert>
+<div class="loading-message" *ngIf="isFetching">
+  <mat-spinner
+    diameter="20"
+    color="primary"
+    style="margin-right: 2px"
+  ></mat-spinner>
+  Loading patients...
+</div>
+
+<div *ngIf="!isFetching && !error">
+  <div
+    class="card-container"
+    *ngIf="loadedPatients && loadedPatients.length > 0; else noPatients"
+    @listAnimation
+  >
+    <h2 class="patient-title">Patient List</h2>
+    <div class="patient-cards">
+      <mat-card
+        *ngFor="let patient of loadedPatients"
+        class="mat-elevation-z3 patient-card"
+      >
+        <mat-card-content>
+          <p class="patient-details">
+            <strong>First Name:</strong> {{ patient.firstname }}
+          </p>
+          <p class="patient-details">
+            <strong>Last Name:</strong> {{ patient.lastname }}
+          </p>
+          <p class="patient-details">
+            <strong>Zip Code:</strong> {{ patient.zipcode }}
+          </p>
+          <p class="patient-details">
+            <strong>Mobile:</strong> {{ patient.mobile }}
+          </p>
+          <p class="patient-details">
+            <strong>Patient ID:</strong> {{ patient.patient_id }}
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <ng-template #noPatients>
+    <h2 class="no-patients">
+      No patients found. Kindly add a new patient to see the details here!
+    </h2>
+  </ng-template>
+</div>

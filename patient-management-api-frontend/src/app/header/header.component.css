@@ -1,0 +1,48 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1200;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  width: 100%;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.menu-button {
+  display: none;
+}
+
+.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .navbar-links {
+    display: none;
+  }
+ 
+  .menu-button {
+    display: block;
+
+    color: white;
+  }
+}

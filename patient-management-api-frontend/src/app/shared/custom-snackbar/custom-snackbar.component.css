@@ -1,0 +1,14 @@
+.snackbar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mat-snack-bar.custom-snackbar {
+  background-color: #4caf4fd9;
+  color: white;
+}
+
+.mat-snack-bar {
+  margin: 0;
+}

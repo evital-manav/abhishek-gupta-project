@@ -1,0 +1,132 @@
+<form [formGroup]="patientForm" (ngSubmit)="onSubmit()" class="patient-form">
+  <mat-form-field appearance="fill">
+    <mat-label>Zipcode</mat-label>
+    <input matInput formControlName="zipcode" type="text" />
+    <mat-error
+      *ngIf="
+        patientForm.get('zipcode')?.invalid &&
+        patientForm.get('zipcode')?.touched
+      "
+    >
+      <small *ngIf="patientForm.get('zipcode')?.errors?.['pattern']"
+        >Enter a valid 6-digit number.</small
+      >
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Mobile*</mat-label>
+    <input matInput formControlName="mobile" type="text" maxlength="10"
+    (keypress)="preventExtraDigits($event)"/>
+    <mat-error
+      *ngIf="
+        patientForm.get('mobile')?.invalid && patientForm.get('mobile')?.touched
+      "
+    >
+      <small *ngIf="patientForm.get('mobile')?.errors?.['required']"
+        >Mobile is required.</small
+      >
+      <small *ngIf="patientForm.get('mobile')?.errors?.['pattern']"
+        >Mobile number must be 10 digits.</small
+      >
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>First Name*</mat-label>
+    <input matInput formControlName="first_name" type="text" />
+    <mat-error
+      *ngIf="
+        patientForm.get('first_name')?.invalid &&
+        patientForm.get('first_name')?.touched
+      "
+    >
+      <small *ngIf="patientForm.get('first_name')?.errors?.['required']"
+        >First name is required.</small
+      >
+      <small *ngIf="patientForm.get('first_name')?.errors?.['minlength']"
+        >First name must be at least 3 characters long.</small
+      >
+      <small *ngIf="patientForm.get('first_name')?.errors?.['pattern']"
+        >First name should only contain letters.</small
+      >
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Last Name</mat-label>
+    <input matInput formControlName="last_name" type="text" />
+    <mat-error
+      *ngIf="
+        patientForm.get('last_name')?.invalid &&
+        patientForm.get('last_name')?.touched
+      "
+    >
+      <small *ngIf="patientForm.get('last_name')?.errors?.['minlength']"
+        >Last name must be at least 3 characters long.</small
+      >
+      <small *ngIf="patientForm.get('last_name')?.errors?.['pattern']"
+        >Last name should only contain letters.</small
+      >
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Date of Birth</mat-label>
+    <input matInput formControlName="dob" placeholder="YYYY-MM-DD" />
+    <mat-error
+      *ngIf="patientForm.get('dob')?.invalid && patientForm.get('dob')?.touched"
+    >
+      <small>Date of birth must be in the format YYYY-MM-DD.</small>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Gender*</mat-label>
+    <mat-select formControlName="gender">
+      <mat-option value="">Select Gender</mat-option>
+      <mat-option value="male">Male</mat-option>
+      <mat-option value="female">Female</mat-option>
+      <mat-option value="other">Other</mat-option>
+    </mat-select>
+    <mat-error
+      *ngIf="
+        patientForm.get('gender')?.invalid && patientForm.get('gender')?.touched
+      "
+    >
+      <small>Gender is required.</small>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Blood Group</mat-label>
+    <input matInput formControlName="blood_group" type="text" />
+    <mat-error
+      *ngIf="
+        patientForm.get('blood_group')?.invalid &&
+        patientForm.get('blood_group')?.touched
+      "
+    >
+      <small *ngIf="patientForm.get('blood_group')?.errors?.['maxlength']"
+        >Blood group cannot exceed 3 characters.</small
+      >
+      <small *ngIf="patientForm.get('blood_group')?.errors?.['pattern']"
+        >Enter a valid blood group (e.g., A+, O-, AB-).</small
+      >
+    </mat-error>
+  </mat-form-field>
+  <div class="button-group">
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="patientForm.invalid"
+    >
+      Submit
+    </button>
+    <button mat-raised-button type="button" color="warn" (click)="onReset()">
+      Reset
+    </button>
+    <button mat-raised-button type="button" (click)="onCancel()">Cancel</button>
+  </div>
+</form>
